@@ -1,2 +1,2 @@
 # Lectures
-Some projects written along the path of exploration.
+:school: Some stuff written along the path of exploration.
