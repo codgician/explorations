@@ -1,0 +1,4 @@
+*.o
+proxy
+logfile
+tiny
