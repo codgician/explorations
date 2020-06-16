@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
         sbuf_insert(&sbuf, connfd);
         Getnameinfo((SA *) &clientaddr, clientlen, client_hostname, MAXLINE, 
                     client_port, MAXLINE, 0);
-        // printf("Connected to (%s, %s)\n", client_hostname, client_port);
+        printf("Connected to (%s, %s)\n", client_hostname, client_port);
     }
 
     Free(cachep);
@@ -138,7 +138,6 @@ void work(int fd) {
         }
         data = (char *)Malloc(MAX_OBJECT_SIZE * sizeof(char));
         char *data_head = data;
-        int charcnt = 0;
         ssize_t n;
         Rio_readinitb(&rio, connfd);
         while ((n = Rio_readlineb(&rio, buf, MAXLINE))) {
@@ -147,7 +146,7 @@ void work(int fd) {
                     cacheable = false;
                 } else {
                     strncpy(data_head, buf, n);
-                    data_head += n; charcnt += n;
+                    data_head += n;
                 }
             }
 
@@ -289,7 +288,7 @@ int send_to_remote(int fd, Request *req, bool* cacheable) {
     }
 
     sprintf(buf_head, "\r\n");
-    Rio_writen(clientfd, buf, MAXLINE);
+    Rio_writen(clientfd, buf, strlen(buf));
     *cacheable = errno != EPIPE && errno != ECONNRESET;
     return clientfd;
 }
@@ -377,12 +376,10 @@ void cache_insert(const Request *key, const char *val) {
             }
         }
 
-        assert(id != -1 && id < cachep -> itemcnt);
         if (id != cachep -> itemcnt) {
             cachep -> data[id] = cachep -> data[cachep -> itemcnt - 1];
         }
         cachep -> itemcnt--;
-        assert(cachep -> itemcnt >= 0);
     }
 
     /* Writing happens */
