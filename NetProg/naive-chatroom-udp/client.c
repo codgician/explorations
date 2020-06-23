@@ -105,6 +105,7 @@ void *reciever_thread(void *vargp) {
         if (strncasecmp(buf, "LOGIN ", strlen("LOGIN ")) == 0) {
             int uid;
             if (sscanf(buf, "LOGIN %d", &uid) == 1) {
+                // printf("uid = %d\n", uid);
                 global_uid = uid;
                 V(&mutex);  /* Mark uid as available */
             }

@@ -1,6 +1,6 @@
 *.o
 proxy
 logfile
-tiny
+/tiny/tiny
 .proxy
 .noproxy
