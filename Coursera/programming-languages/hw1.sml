@@ -2,7 +2,7 @@
 
 fun is_older (x : int * int * int, y : int * int * int) = 
     if (#1 x) <> (#1 y) 
-    then (#1 x) < (#1 x)
+    then (#1 x) < (#1 y)
     else if (#2 x) <> (#2 y)
     then (#2 x) < (#2 y)
     else false
