@@ -5,7 +5,7 @@ fun is_older (x : int * int * int, y : int * int * int) =
     then (#1 x) < (#1 y)
     else if (#2 x) <> (#2 y)
     then (#2 x) < (#2 y)
-    else false
+    else (#3 x) < (#3 y)
 
 fun number_in_month (xs : (int * int * int) list, y : int) = 
     if null xs
