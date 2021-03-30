@@ -3,7 +3,6 @@
 module ISO where
 
 import Data.Maybe
-import Data.Tuple
 import Data.Void
 -- A type of `Void` have no value.
 -- So it is impossible to construct `Void`,
@@ -43,7 +42,7 @@ refl = (id, id)
 
 -- isomorphism is symmetric
 symm :: ISO a b -> ISO b a
-symm = swap
+symm (ab, ba) = (ba, ab)
 
 -- isomorphism is transitive
 trans :: ISO a b -> ISO b c -> ISO a c
@@ -86,20 +85,19 @@ isoUnMaybe (mamb, mbma) = (ab, ba)
 -- isoUnEither :: ISO (Either a b) (Either c d) -> ISO a c -> ISO b d.
 -- Note that we have
 isoEU :: ISO (Either [()] ()) (Either [()] Void)
-isoEU = (xy, yx)
-  where
-    xy = \case
-        Left xs -> Left (() : xs)
-        Right x -> Left [] 
-    yx = \case
-        Left (x:xs) -> Left xs
-        Left []     -> Right ()
-
 -- where (), the empty tuple, has 1 value, and Void has 0 value
 -- If we have isoUnEither,
 -- We have ISO () Void by calling isoUnEither isoEU
 -- That is impossible, since we can get a Void by substL on ISO () Void
 -- So it is impossible to have isoUnEither
+isoEU = (xy, yx)
+  where
+    xy = \case
+        Left xs -> Left (():xs)
+        Right x -> Left [] 
+    yx = \case
+        Left (x:xs) -> Left xs
+        Left []     -> Right ()
 
 -- And we have isomorphism on isomorphism!
 isoSymm :: ISO (ISO a b) (ISO b a)
