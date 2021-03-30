@@ -1,4 +1,4 @@
-# Lectures
+# Explorations
 
 :school: Naive code written while learning this and that.
 
