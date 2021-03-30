@@ -10,9 +10,7 @@ newtype Parser a = P { unP :: String -> [(String, a)] }
 
 -- | Change the result of a parser.
 pmap :: (a -> b) -> Parser a -> Parser b
-pmap f p = P (\inp -> case unP p inp of
-            []  -> []
-            r   -> (\(out, v) -> (out, f v)) `map` r)
+pmap f p = P (\inp -> (\(out, v) -> (out, f v)) `map` unP p inp)
 
 -- | Operator version of 'pmap'.
 (<#>) :: (a -> b) -> Parser a -> Parser b
@@ -43,22 +41,13 @@ inject x = P (\inp -> [(inp, x)])
 -- first and then the value, return a parser which applies the function to the
 -- value.
 (<@>) :: Parser (a -> b) -> Parser a -> Parser b
-pf <@> px = P (\inp -> case unP pf inp of
-            []  -> []
-            rs  -> concat [unP (f <#> px) out | (out, f) <- rs])
+pf <@> px = P (\inp -> concat [unP (f <#> px) out | (out, f) <- unP pf inp])
 
 (<@) :: Parser a -> Parser b -> Parser a
-px <@ py = P (\inp -> case unP px inp of
-            []  -> []
-            rx  -> concat [f out vx | (out, vx) <- rx]
-              where f out vx = case unP py out of
-                          []  -> [(out, vx)]
-                          ry  -> (\(out', _) -> (out', vx)) `map` ry)
+px <@ py = (const <#> px) <@> py
          
 (@>) :: Parser a -> Parser b -> Parser b
-px @> py = P (\inp -> case unP px inp of
-            []  -> unP py inp
-            rx  -> concat [unP py out | (out, vx) <- rx])
+px @> py = (flip const <#> px) <@> py
 
 infixl 4 <@
 infixl 4 @>
@@ -75,9 +64,7 @@ emptyP = P $ const []
 
 -- | Combine two parsers: When given an input, provide the results of both parser run on the input.
 (<<>>) :: Parser a -> Parser a -> Parser a
-(<<>>) px py = P (\inp -> case unP px inp of
-            []  -> unP py inp
-            rx -> rx ++ unP py inp)
+(<<>>) px py = P (\inp -> unP px inp  ++ unP py inp)
 
 infixl 3 <<>>
 
@@ -132,26 +119,24 @@ expr :: Parser Expr
 expr = cnst <<>> binOpExpr <<>> neg <<>> zero
 
 cnst :: Parser Expr
-cnst = inject ConstE <@> int
+cnst = ConstE <#> int
 
 binOpExpr :: Parser Expr
-binOpExpr = inject f <@> charP '(' <@> expr <@> space <@> binOp <@> space <@> expr <@> charP ')'
-  where 
-    f _ ex _ op _ ey _ = BinOpE op ex ey 
-    space = predP isSpace
+binOpExpr = flip BinOpE <#> (charP '(' @> expr <@ space) <@> binOp <@> (space @> expr <@ charP ')')
+  where space = predP isSpace
 
 binOp :: Parser BinOp
-binOp = inject (const AddBO) <@> charP '+' 
-  <<>> inject (const MulBO) <@> charP '*'
+binOp = AddBO <# charP '+'
+  <<>> MulBO <# charP '*'
 
 neg :: Parser Expr
-neg = inject (const NegE) <@> charP '-' <@> expr
+neg = NegE <#> (charP '-' @> expr)
 
 zero :: Parser Expr
-zero = const ZeroE <#> charP 'z'
+zero = ZeroE <# charP 'z'
 
 int :: Parser Int
-int = inject read <@> some digit
+int = read <#> some digit
 
 digit :: Parser Char
 digit = predP isDigit
