@@ -1,13 +1,12 @@
 module ScreenLockingPatterns.Solution where
 
-import ScreenLockingPatterns.Shared
-{-
-module ScreenLockingPatterns.Shared where
+-- import ScreenLockingPatterns.Shared
+import Data.List ((\\))
+
+-- module ScreenLockingPatterns.Shared where
 data Vertex
   = A | B | C | D | E | F | G | H | I
-  deriving (Show, Read, Eq, Ord, Enum, Bounded, Ix)
--}
-import Data.List ((\\))
+  deriving (Show, Read, Eq, Ord, Enum, Bounded)
 
 diag :: Vertex -> Vertex -> Maybe Vertex
 diag x y 
