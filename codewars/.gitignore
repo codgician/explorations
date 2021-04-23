@@ -1,0 +1,4 @@
+stack.yaml
+stack.yaml.lock
+hie.yaml
+.stack-work/
