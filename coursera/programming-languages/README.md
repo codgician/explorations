@@ -1,6 +1,7 @@
 # UW CSE341: Programming Languages
 
-Homepage: [U Washington](https://courses.cs.washington.edu/courses/cse341/13sp/) | [Coursera](https://www.coursera.org/learn/programming-languages)
+- Homepage: [U Washington](https://courses.cs.washington.edu/courses/cse341/13sp/)
+- Coursera: [Part A](https://www.coursera.org/learn/programming-languages) | [Part B](https://www.coursera.org/learn/programming-languages-part-b) | [Part C](https://www.coursera.org/learn/programming-languages-part-c)
 
 ## Learning a new programming language
 

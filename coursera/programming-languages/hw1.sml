@@ -23,7 +23,7 @@ fun dates_in_month (xs : (int * int * int) list, y : int) =
     if null xs
     then []
     else if #2 (hd xs) = y
-    then (hd xs) :: dates_in_month (tl xs, y)
+    then (hd xs)::dates_in_month (tl xs, y)
     else dates_in_month (tl xs, y)
 
 fun dates_in_months (xs : (int * int * int) list, ys : int list) =
@@ -57,7 +57,7 @@ fun what_month (x : int) =
 fun month_range (l : int, r : int) =
     if l > r
     then []
-    else List.tabulate (r - l + 1, fn x => what_month (x + l))
+    else what_month l::month_range(l + 1, r)
 
 fun oldest (xs : (int * int * int) list) =
     if null xs
@@ -85,11 +85,11 @@ fun remove_dup_sorted (xs : int list) =
     else if null (tl xs)
     then [hd xs]
     else if hd xs <> hd (tl xs)
-    then (hd xs) :: remove_dup_sorted (tl xs)
+    then (hd xs)::remove_dup_sorted (tl xs)
     else remove_dup_sorted (tl xs)
 
 fun remove_dup (xs : int list) =
-    remove_dup_sorted (ListMergeSort.sort (fn (x, y) => x > y) xs)
+    remove_dup_sorted (ListMergeSort.sort op> xs)
    
 fun number_in_months_challenge (xs : (int * int * int) list, ys : int list) =
     number_in_months (xs, remove_dup (ys))

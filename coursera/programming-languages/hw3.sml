@@ -81,19 +81,11 @@ val check_pat =
               | TupleP ps => List.foldl (fn (p, a) => extract p @ a) [] ps
               | ConstructorP (_, p) => extract p
               | _ => []
-        fun qsort [] = []
-          | qsort (p::xs) =
-                let
-                    val lesser = List.filter (fn x => x < p) xs
-                    val greater = List.filter (fn x => x >= p) xs
-                in
-                    qsort lesser @ p::qsort greater
-                end
         fun check_sorted [] = true
           | check_sorted (x::xs) = #1 (List.foldl (fn (x, (ans, last)) =>
                                 (x <> last andalso ans, x)) (true, x) xs)
     in
-        check_sorted o qsort o extract
+        check_sorted o ListMergeSort.sort op> o extract
     end
 
 fun match (v, p) =
