@@ -110,13 +110,10 @@ fun first_match v ps = SOME (first_answer (fn p => match (v, p)) ps)
 
 fun typecheck_patterns (datatypes, patterns) =
     let
-        fun opt_bind f (SOME x) = f x
-          | opt_bind f NONE = NONE
         (* all_answers': slightly modified version of all_answers,
             where f returns 'a option instead of 'a list option *)
         fun all_answers' f =
-            Option.map List.rev
-            o List.foldl (fn (x, a) =>
+            List.foldr (fn (x, a) =>
                 case (x, a) of
                     (SOME x, SOME a) => SOME (x::a)
                     | _ => NONE
@@ -125,8 +122,7 @@ fun typecheck_patterns (datatypes, patterns) =
         fun type_matches (Anything, _) = true
           | type_matches (_, Anything) = true
           | type_matches (TupleT ts1, TupleT ts2) =
-                (List.foldl (fn (x, a) => x andalso a) true
-                o List.map type_matches o ListPair.zip) (ts1, ts2)
+                (List.all (fn x => x) o List.map type_matches o ListPair.zip) (ts1, ts2)
           | type_matches (t1, t2) = t1 = t2
         (* common (t1, t2): get the common type of types t1 and t2 *)
         fun common (Anything, t) = SOME t
@@ -146,14 +142,14 @@ fun typecheck_patterns (datatypes, patterns) =
               | ConstP x => SOME IntT
               | TupleP ps => (Option.map TupleT o all_answers' get_type) ps
               | ConstructorP (s, p) =>
-                    case (List.filter (fn (c, _, _) => c = s) datatypes, get_type p) of
-                        ((c, dt, at)::_, SOME t) =>
+                    case (List.find (fn (c, _, _) => c = s) datatypes, get_type p) of
+                        (SOME((c, dt, at)), SOME t) =>
                             if type_matches (at, t)
                             then SOME (Datatype dt)
                             else NONE
                       | _ => NONE
     in
-        (opt_bind (List.foldl (fn (x, a) =>
-            opt_bind (fn x' => common (x, x')) a) (SOME Anything))
+        (Option.mapPartial (List.foldl (fn (x, a) =>
+            Option.mapPartial (fn x' => common (x, x')) a) (SOME Anything))
         o (all_answers' get_type)) patterns
     end
