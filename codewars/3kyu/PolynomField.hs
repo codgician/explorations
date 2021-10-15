@@ -19,7 +19,7 @@ polyFromDeg (-1)  = BinaryPolynom []
 polyFromDeg x     = BinaryPolynom [x]
 
 polyFromPowers :: [Int] -> BinaryPolynom
-polyFromPowers = BinaryPolynom . sortDesc
+polyFromPowers = BinaryPolynom . sortBy (flip compare)
 
 instance Show BinaryPolynom where
     show (BinaryPolynom []) = "0"
@@ -28,11 +28,12 @@ instance Show BinaryPolynom where
 -- | Multiplication in the polynom ring.
 multiply :: BinaryPolynom -> BinaryPolynom -> BinaryPolynom
 multiply (BinaryPolynom xs) (BinaryPolynom ys) = BinaryPolynom $
-                                                 removeRepeated $ sortDesc [ x + y | x <- xs, y <- ys ]
-
+                                                 removeRepeated $
+                                                 foldl mergeSortedLists [] [[x + y | x <- xs] | y <- ys]
+        
 -- | Addition and multiplication in the polynom field.
 (.+.), (.*.) :: BinaryPolynom -> BinaryPolynom -> BinaryPolynom
-x .+. y =  BinaryPolynom $ removeRepeated $ sortDesc $ unwrap x ++ unwrap y
+x .+. y =  BinaryPolynom $ removeRepeated $ mergeSortedLists (unwrap x) (unwrap y)
 x .*. y = snd $ polyDivMod (x `multiply` y) m
 
 polyDivMod :: BinaryPolynom -> BinaryPolynom -> (BinaryPolynom, BinaryPolynom)
@@ -44,10 +45,13 @@ polyDivMod x y = if degDelta < 0 then (BinaryPolynom [], x)
                     x' = x .+. (y `multiply` polyFromDeg degDelta)
 
 -- | Helper functions
-sortDesc :: (Ord a) => [a] -> [a]
-sortDesc = sortBy (flip compare)
-
-removeRepeated :: (Eq a) => [a] -> [a]
+removeRepeated :: Eq a => [a] -> [a]
 removeRepeated [] = []
 removeRepeated [x] = [x]
 removeRepeated (x:y:r) = if x == y then removeRepeated r else x:removeRepeated (y:r)
+
+mergeSortedLists :: Ord a => [a] -> [a] -> [a]
+mergeSortedLists xs [] = xs
+mergeSortedLists [] ys = ys
+mergeSortedLists xs@(x:xs') ys@(y:ys') = if x > y then x:mergeSortedLists xs' ys
+                                    else y:mergeSortedLists xs ys'
